@@ -74,7 +74,7 @@ export default function RouteDetail({ route, pet, vets }: RouteDetailProps) {
             총 {formatMinutes(route.stops.reduce((a, s) => a + s.travelMinutes + s.stayMinutes, 0))}
           </Badge>
         </div>
-        <h1 className="mt-2 text-2xl font-bold">{route.title}</h1>
+        <h1 className="mt-2 font-display text-3xl text-ink">{route.title}</h1>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">

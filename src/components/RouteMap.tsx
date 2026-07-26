@@ -35,12 +35,12 @@ function markerHtml(m: MapMarker): { html: string; size: number } {
   }
   if (m.order !== undefined) {
     return {
-      html: `<div style="width:26px;height:26px;border-radius:9999px;background:#ea8a3c;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)">${m.order}</div>`,
+      html: `<div style="width:26px;height:26px;border-radius:9999px;background:#1f4a33;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)">${m.order}</div>`,
       size: 26,
     };
   }
   return {
-    html: `<div style="width:12px;height:12px;border-radius:9999px;background:#7ba05b;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>`,
+    html: `<div style="width:12px;height:12px;border-radius:9999px;background:#f2a93b;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>`,
     size: 12,
   };
 }
@@ -99,7 +99,7 @@ function LeafletRouteMap({ markers, className, drawPath }: RouteMapProps) {
       const path = pathPoints.filter(Boolean);
       if (drawPath && path.length > 1) {
         L.polyline(path, {
-          color: "#ea8a3c",
+          color: "#1f4a33",
           weight: 4,
           dashArray: "8 6",
           opacity: 0.9,
@@ -195,7 +195,7 @@ function KakaoRouteMap({ markers, className, drawPath }: RouteMapProps) {
               map,
               position: pos,
               yAnchor: 2.4,
-              content: `<div style="background:#ea8a3c;color:#fff;border-radius:9999px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${m.order}</div>`,
+              content: `<div style="background:#1f4a33;color:#fff;border-radius:9999px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${m.order}</div>`,
             });
           }
         }
@@ -204,7 +204,7 @@ function KakaoRouteMap({ markers, className, drawPath }: RouteMapProps) {
             map,
             path: pathPoints.filter(Boolean),
             strokeWeight: 4,
-            strokeColor: "#ea8a3c",
+            strokeColor: "#1f4a33",
             strokeStyle: "shortdash",
           });
         }

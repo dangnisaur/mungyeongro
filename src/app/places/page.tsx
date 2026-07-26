@@ -31,7 +31,7 @@ export default async function PlacesPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">문경 반려동물 동반 시설 🗺</h1>
+      <h1 className="font-display text-3xl text-ink">문경 반려동물 동반 시설 🗺</h1>
       <p className="mt-1 text-sm text-muted">
         총 {places.length}곳의 동반 가능 시설 정보를 모았어요.
       </p>

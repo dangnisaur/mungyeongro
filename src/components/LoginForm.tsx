@@ -85,7 +85,7 @@ export default function LoginForm() {
     <Card className="mx-auto max-w-sm space-y-4">
       <div className="text-center">
         <p className="text-3xl">🐾</p>
-        <h1 className="mt-1 text-xl font-bold">
+        <h1 className="mt-1 font-display text-2xl text-ink">
           {mode === "login" ? "다시 만나서 반가워요" : "멍경로에 온 걸 환영해요"}
         </h1>
         <p className="mt-1 text-sm text-muted">

@@ -24,7 +24,7 @@ export default async function HistoryPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold">방문 기록 📝</h1>
+      <h1 className="font-display text-3xl text-ink">방문 기록 📝</h1>
       <p className="mt-1 text-sm text-muted">
         별점을 남기면 아이의 취향을 학습해서 다음 코스에 반영해요.
         {pending > 0 && (

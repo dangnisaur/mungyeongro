@@ -219,7 +219,7 @@ export default function PetManager({ pets }: { pets: Pet[] }) {
                 onChange={(e) =>
                   setForm({ ...form, energyLevel: Number(e.target.value) })
                 }
-                className="w-full accent-[#ea8a3c]"
+                className="w-full accent-[#1f4a33]"
               />
             </div>
             <div>
@@ -235,7 +235,7 @@ export default function PetManager({ pets }: { pets: Pet[] }) {
                 onChange={(e) =>
                   setForm({ ...form, sociability: Number(e.target.value) })
                 }
-                className="w-full accent-[#ea8a3c]"
+                className="w-full accent-[#1f4a33]"
               />
             </div>
             <label className="flex items-center gap-2 text-sm font-medium">
@@ -245,7 +245,7 @@ export default function PetManager({ pets }: { pets: Pet[] }) {
                 onChange={(e) =>
                   setForm({ ...form, prefersIndoor: e.target.checked })
                 }
-                className="h-4 w-4 accent-[#ea8a3c]"
+                className="h-4 w-4 accent-[#1f4a33]"
               />
               실내 활동을 더 좋아해요
             </label>
