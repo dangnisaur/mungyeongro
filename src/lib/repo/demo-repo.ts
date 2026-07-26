@@ -13,7 +13,7 @@ import type {
 } from "@/types/domain";
 import { DEMO_PLACES } from "@/data/demo/places";
 import { updateTagWeights } from "@/lib/recommend/learning";
-import type { PetInput, Repo, VisitInput } from "./types";
+import type { Repo, VisitInput } from "./types";
 
 interface StoreShape {
   pets: Pet[];
@@ -100,19 +100,26 @@ function initialStore(demoUserId: string): StoreShape {
 }
 
 let memoryStore: StoreShape | null = null;
+let loadedMtimeMs = 0;
 
+// Next dev/서버리스는 워커 프로세스가 여러 개일 수 있어, 파일 mtime이 바뀌면
+// 메모리 캐시를 무효화해 워커 간 쓰기가 서로 보이게 한다.
 function loadStore(demoUserId: string): StoreShape {
-  if (memoryStore) return memoryStore;
   try {
     if (fs.existsSync(STORE_PATH)) {
-      memoryStore = JSON.parse(
-        fs.readFileSync(STORE_PATH, "utf-8"),
-      ) as StoreShape;
+      const mtimeMs = fs.statSync(STORE_PATH).mtimeMs;
+      if (!memoryStore || mtimeMs > loadedMtimeMs) {
+        memoryStore = JSON.parse(
+          fs.readFileSync(STORE_PATH, "utf-8"),
+        ) as StoreShape;
+        loadedMtimeMs = mtimeMs;
+      }
       return memoryStore;
     }
   } catch {
-    // 손상된 파일 → 초기화
+    // 손상된 파일 → 아래에서 초기화
   }
+  if (memoryStore) return memoryStore; // 파일 쓰기 불가 환경 → 메모리 유지
   memoryStore = initialStore(demoUserId);
   saveStore();
   return memoryStore;
@@ -122,6 +129,7 @@ function saveStore(): void {
   if (!memoryStore) return;
   try {
     fs.writeFileSync(STORE_PATH, JSON.stringify(memoryStore, null, 2), "utf-8");
+    loadedMtimeMs = fs.statSync(STORE_PATH).mtimeMs;
   } catch {
     // 읽기전용 파일시스템(Vercel 등) → 메모리로만 유지
   }
