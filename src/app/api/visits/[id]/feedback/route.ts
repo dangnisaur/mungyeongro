@@ -9,6 +9,9 @@ type Params = { params: Promise<{ id: string }> };
 export async function POST(req: Request, { params }: Params) {
   const { id } = await params;
   const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: "로그인이 필요해요" }, { status: 401 });
+  }
   const parsed = feedbackInputSchema.safeParse(await req.json());
   if (!parsed.success) {
     return NextResponse.json(

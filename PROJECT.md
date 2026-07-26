@@ -29,12 +29,14 @@
 |---|---|
 | 프레임워크 | Next.js (App Router) + React + TypeScript |
 | 스타일 | Tailwind CSS v4 + shadcn/ui 스타일 컴포넌트 |
-| DB | Supabase (PostgreSQL + PostGIS) + Prisma |
-| 인증 | Supabase Auth (이메일 + 구글) |
-| 지도 | 카카오맵 JS SDK |
+| DB | **Firebase Firestore** (서버 firebase-admin 경유, 클라이언트 직접 접근 차단) |
+| 인증 | **Firebase Auth** (이메일 + 구글) — 로컬은 에뮬레이터 |
+| 지도 | Leaflet + OpenStreetMap (기본, 키 불필요) / 카카오맵 JS SDK (키 있을 때) |
 | 공공데이터 | 한국관광공사 TourAPI 4.0 (KorPetTourService, KorService) |
 | 테스트 | Vitest |
-| 배포 | Vercel |
+| 배포 | Vercel + Firebase 프로젝트 |
+
+> (구) Supabase+Prisma 스택은 결정 로그 #5에 따라 Firebase로 전환됨.
 
 ## 4. 데이터 소스
 
@@ -145,13 +147,12 @@ score(place, pet, ctx) =
 
 ### 1주차 — 기반 구축
 - [x] Next.js + TS + Tailwind 초기화
-- [ ] Supabase 프로젝트 생성, PostGIS 활성화 → **블로커 #1** (데모 모드로 우회)
-- [x] Prisma 스키마 작성 (마이그레이션은 DB 생성 후 `db:push`)
+- [x] DB — Firebase Firestore (에뮬레이터로 로컬 완전 동작, 결정 로그 #5)
 - [x] shadcn/ui 스타일 컴포넌트 셋업 (결정 로그 #4 방식)
 - [x] TourAPI 호출 라이브러리 (`src/lib/tourapi/`)
-- [x] `seed.ts` 작성 (키 발급 후 실행 가능) + 데모 시드 103곳 내장
+- [x] 시드 스크립트 (`seed:demo` 103곳 + 데모 계정, `seed:tourapi` 실데이터)
 - [x] tag-extractor 로직 (+테스트)
-- [ ] Supabase Auth → **블로커 #1** (어댑터만 구현, 데모 사용자로 동작)
+- [x] 인증 — Firebase Auth 이메일+구글 (로그인/가입/로그아웃/세션 쿠키/401 가드)
 
 ### 2주차 — 핵심 도메인
 - [x] 반려동물 프로필 CRUD (UI + API)
@@ -160,7 +161,7 @@ score(place, pet, ctx) =
 - [x] `/plan` 페이지 (프로필 선택 + 테마/시간)
 
 ### 3주차 — 시각화
-- [x] 지도 컴포넌트 (카카오맵 SDK + 키 없을 때 SVG 약도 폴백)
+- [x] 지도 컴포넌트 (Leaflet+OSM 실지도 기본, 카카오맵 키 있으면 자동 전환)
 - [x] `/routes/[id]` 페이지 (지도 + 타임라인, 점심시간 식당 자동 배치)
 - [x] 응급 동물병원 오버레이
 - [x] 모바일 반응형 (Tailwind 반응형 그리드)
@@ -173,9 +174,11 @@ score(place, pet, ctx) =
 - [x] README 정리
 - [x] 데모 시나리오 문서 (`docs/DEMO.md`)
 
-### 검증 상태
+### 검증 상태 (Firebase 전환 후)
 - `npm run build` 통과, `npm test` 29/29 통과, `npm run lint` 클린
-- E2E 수동 검증: 코스 생성 → 상세(지도/타임라인) → 방문 기록 → 별점 피드백 전 플로우 동작 확인
+- E2E 검증 (에뮬레이터 스택): Firebase 로그인(UI+API) → 세션 쿠키 → 코스 생성 →
+  상세(Leaflet 지도/타임라인) → 방문 기록 → 별점 피드백 → 학습 가중치 갱신,
+  비로그인 API 401 / 페이지 리다이렉트 확인
 
 ## 결정 로그
 
@@ -191,8 +194,20 @@ score(place, pet, ctx) =
 4. **(2026-07-26) shadcn/ui는 CLI 대신 필요한 컴포넌트만 수기 포팅** — 프로젝트 경로가
    한글이고 오프라인 안정성을 위해 button/card/input 등 필수 컴포넌트만 동일 스타일로 직접 작성.
 
+5. **(2026-07-26) Supabase+Prisma → Firebase 전환** — 사용자 지시("firebase 기반으로 바꾸자").
+   Firestore + Firebase Auth로 전면 교체. 로컬은 **에뮬레이터**(demo-munggyeongro,
+   로그인/키 불필요)로 실제 스택 그대로 동작하고, 실프로젝트는 env만 채우면 전환된다.
+   데이터 접근은 전부 서버(firebase-admin) 경유, Firestore 보안 규칙은 클라이언트
+   접근 전면 차단. Prisma 스키마/시드는 제거하고 `scripts/seed-*.ts`로 대체.
+6. **(2026-07-26) 지도 기본값을 Leaflet+OpenStreetMap으로** — "진짜 작동하는 웹" 요구.
+   키 없이도 실제 인터랙티브 지도가 나오도록 기본을 Leaflet으로, 카카오맵은 키 있을 때
+   자동 전환(+실패 시 Leaflet 폴백)으로 변경. SVG 약도 폴백은 삭제.
+
 ## 블로커
 
-1. **Supabase 프로젝트 미생성** — URL/anon key 필요. 데모 모드로 우회 중.
-2. **TourAPI 인증키 미발급** — 공공데이터포털에서 KorPetTourService 활용신청 필요. 데모 시드로 우회 중.
-3. **카카오맵 JS 키 미발급** — developers.kakao.com에서 앱 생성 필요. 키 없으면 정적 폴백 지도 렌더.
+1. **TourAPI 인증키 미발급** — 공공데이터포털에서 KorPetTourService 활용신청 필요.
+   발급 후 `npm run seed:tourapi`로 실데이터 교체. 그때까지 데모 시드로 동작.
+2. **실제 Firebase 프로젝트 미생성 (배포용)** — 콘솔에서 생성 후 env 설정 필요.
+   로컬은 에뮬레이터로 완전 동작하므로 개발에는 지장 없음.
+3. **카카오맵 JS 키 미발급 (선택)** — 없어도 Leaflet 실지도로 동작. 심사 어필용으로
+   국내 지도가 필요하면 developers.kakao.com에서 발급.

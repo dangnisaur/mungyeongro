@@ -22,27 +22,39 @@
 
 ## 기술 스택
 
-Next.js (App Router) · React · TypeScript · Tailwind CSS · Prisma · Supabase(PostgreSQL/PostGIS) · 카카오맵 · Vitest
+Next.js (App Router) · React · TypeScript · Tailwind CSS · **Firebase (Auth + Firestore)** · Leaflet/OpenStreetMap (카카오맵 선택) · Vitest
 
 ## 시작하기
 
+로컬 개발은 **Firebase 에뮬레이터**로 동작해서 Firebase 프로젝트나 API 키가 필요 없습니다.
+(요구사항: Node.js 20+, Java 17+ — Firestore 에뮬레이터가 사용)
+
 ```bash
 npm install
-cp .env.example .env   # 키 입력 (없으면 데모 모드로 동작)
-npm run dev
+npm run dev:all      # Firebase 에뮬레이터 + Next.js 동시 실행
+npm run seed:demo    # (다른 터미널에서 1회) 시설 103곳 + 데모 계정 시드
 ```
 
-- **데모 모드**: 환경변수 없이 실행하면 내장 시드 데이터(문경시 반려동물 동반 시설)로 전 기능이 동작합니다.
-- **실데이터 모드**: `.env`에 TourAPI 키·Supabase 정보를 넣고 `npm run db:push && npm run db:seed`.
+- 접속: http://localhost:3000 · 데모 로그인: **demo@mung.kr / demo1234** (직접 가입도 가능)
+- 에뮬레이터 UI: http://127.0.0.1:4000 (Firestore/Auth 데이터 확인)
+- 에뮬레이터 데이터는 `.firebase-data/`에 저장돼 재시작해도 유지됩니다. 리셋하려면 폴더 삭제.
+
+### 실제 Firebase 프로젝트로 배포
+
+1. Firebase 콘솔에서 프로젝트 생성 → Auth(이메일/구글) 활성화, Firestore 생성
+2. `.env`에 `NEXT_PUBLIC_FIREBASE_*`와 `FIREBASE_SERVICE_ACCOUNT`(서비스 계정 JSON) 설정, `NEXT_PUBLIC_FIREBASE_EMULATOR=0`
+3. `npm run seed:demo`(데모 데이터) 또는 TourAPI 키 준비 후 `npm run seed:tourapi`(실데이터)
 
 ### 스크립트
 
 | 명령 | 설명 |
 |---|---|
-| `npm run dev` | 개발 서버 |
-| `npm run build` | 프로덕션 빌드 |
-| `npm test` | Vitest 단위 테스트 (추천 알고리즘) |
-| `npm run db:seed` | TourAPI에서 문경시 데이터 적재 |
+| `npm run dev:all` | 에뮬레이터 + 개발 서버 동시 실행 |
+| `npm run dev` | 개발 서버만 (에뮬레이터 별도 실행 필요) |
+| `npm run emulators` | Firebase 에뮬레이터만 |
+| `npm run seed:demo` | 시설 시드 + 데모 계정 생성 |
+| `npm run seed:tourapi` | TourAPI에서 문경시 실데이터 적재 (키 필요) |
+| `npm run build` / `npm test` | 프로덕션 빌드 / 단위 테스트 |
 
 ## 데이터 출처
 

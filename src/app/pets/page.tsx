@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import PetManager from "@/components/PetManager";
 import { getSessionUser } from "@/lib/auth";
 import { getRepo } from "@/lib/repo";
@@ -6,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PetsPage() {
   const user = await getSessionUser();
+  if (!user) redirect("/login");
   const pets = await getRepo().listPets(user.id);
 
   return (

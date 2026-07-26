@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import FeedbackStars from "@/components/FeedbackStars";
 import { Badge, Card } from "@/components/ui";
 import { getSessionUser } from "@/lib/auth";
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HistoryPage() {
   const user = await getSessionUser();
+  if (!user) redirect("/login");
   const repo = getRepo();
   const [visits, pets, places] = await Promise.all([
     repo.listVisits(user.id),

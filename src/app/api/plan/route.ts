@@ -7,6 +7,9 @@ import { planInputSchema } from "@/lib/schemas";
 /** 프로필 × 테마 × 시간 → 추천 코스 생성 */
 export async function POST(req: Request): Promise<NextResponse> {
   const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: "로그인이 필요해요" }, { status: 401 });
+  }
   const parsed = planInputSchema.safeParse(await req.json());
   if (!parsed.success) {
     return NextResponse.json(

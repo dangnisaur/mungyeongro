@@ -5,9 +5,12 @@ import { petInputSchema } from "@/lib/schemas";
 
 type Params = { params: Promise<{ id: string }> };
 
+const UNAUTHORIZED = { error: "로그인이 필요해요" };
+
 export async function PATCH(req: Request, { params }: Params) {
   const { id } = await params;
   const user = await getSessionUser();
+  if (!user) return NextResponse.json(UNAUTHORIZED, { status: 401 });
   const parsed = petInputSchema.safeParse(await req.json());
   if (!parsed.success) {
     return NextResponse.json(
@@ -25,6 +28,7 @@ export async function PATCH(req: Request, { params }: Params) {
 export async function DELETE(_req: Request, { params }: Params) {
   const { id } = await params;
   const user = await getSessionUser();
+  if (!user) return NextResponse.json(UNAUTHORIZED, { status: 401 });
   const ok = await getRepo().deletePet(user.id, id);
   if (!ok) {
     return NextResponse.json({ error: "찾을 수 없어요" }, { status: 404 });

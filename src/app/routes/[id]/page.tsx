@@ -17,8 +17,9 @@ export default async function RoutePage({
   const route = await repo.getRoute(id);
   if (!route) notFound();
 
+  // 미로그인 사용자도 공유된 코스는 볼 수 있다 (방문 기록 버튼만 비활성)
   const [pet, vets] = await Promise.all([
-    repo.getPet(user.id, route.petId),
+    user ? repo.getPet(user.id, route.petId) : Promise.resolve(null),
     repo.listVets(),
   ]);
 

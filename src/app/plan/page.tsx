@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import PlanForm from "@/components/PlanForm";
 import { getSessionUser } from "@/lib/auth";
 import { getRepo } from "@/lib/repo";
@@ -6,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PlanPage() {
   const user = await getSessionUser();
+  if (!user) redirect("/login");
   const pets = await getRepo().listPets(user.id);
 
   return (

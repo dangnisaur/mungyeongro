@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
+import UserMenu from "@/components/UserMenu";
+import { getSessionUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "멍경로 — 반려동물 동반 문경 여행 플래너",
@@ -15,11 +18,12 @@ const NAV = [
   { href: "/history", label: "방문 기록" },
 ] as const;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getSessionUser();
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
@@ -44,6 +48,9 @@ export default function RootLayout({
                   {item.label}
                 </Link>
               ))}
+              <span className="ml-2">
+                <UserMenu user={user} />
+              </span>
             </nav>
           </div>
         </header>
