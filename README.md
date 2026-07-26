@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🐕 멍경로 (MungGyeongRo)
 
-## Getting Started
+> **우리 강아지 성향에 딱 맞는 문경 여행 코스를 만들어주는 반려동물 동반 여행 플래너**
 
-First, run the development server:
+한국관광공사 TourAPI(반려동물 동반여행 정보)를 활용해, 반려견 프로필(크기·활동량·성향)에
+맞춘 문경시 여행 코스를 자동으로 생성합니다. 코스는 카카오맵 위에 타임라인과 함께
+표시되며, 여행 중 응급상황을 대비한 동물병원 오버레이를 제공합니다.
+
+## 왜 문경인가?
+
+문경시는 대표적인 인구감소 지역이지만, 문경새재·진남교반 등 반려동물과 함께 걷기 좋은
+자연·문화 자원이 풍부합니다. 급성장하는 반려동물 동반 여행 수요와 문경의 자원을
+공공데이터로 연결해 지역 활력에 기여하는 것이 이 서비스의 목표입니다.
+
+## 주요 기능
+
+- 🐶 **반려동물 프로필** — 크기, 활동량, 사회성, 실내/실외 선호 등록
+- ✨ **AI 코스 추천** — 프로필 × 테마 × 가용시간 기반 점수화로 하루 코스 자동 구성
+- 🗺 **지도 + 타임라인** — 카카오맵 위 경로 시각화, 시간대별 일정표
+- 🏥 **응급 동물병원 오버레이** — 코스 주변 동물병원 즉시 확인
+- 📝 **학습 루프** — 방문 후 만족도 피드백이 다음 추천에 반영
+
+## 기술 스택
+
+Next.js (App Router) · React · TypeScript · Tailwind CSS · Prisma · Supabase(PostgreSQL/PostGIS) · 카카오맵 · Vitest
+
+## 시작하기
 
 ```bash
+npm install
+cp .env.example .env   # 키 입력 (없으면 데모 모드로 동작)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **데모 모드**: 환경변수 없이 실행하면 내장 시드 데이터(문경시 반려동물 동반 시설)로 전 기능이 동작합니다.
+- **실데이터 모드**: `.env`에 TourAPI 키·Supabase 정보를 넣고 `npm run db:push && npm run db:seed`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 스크립트
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 명령 | 설명 |
+|---|---|
+| `npm run dev` | 개발 서버 |
+| `npm run build` | 프로덕션 빌드 |
+| `npm test` | Vitest 단위 테스트 (추천 알고리즘) |
+| `npm run db:seed` | TourAPI에서 문경시 데이터 적재 |
 
-## Learn More
+## 데이터 출처
 
-To learn more about Next.js, take a look at the following resources:
+- [한국관광공사 TourAPI 4.0](https://api.visitkorea.or.kr/) — 반려동물 동반여행 정보 서비스
+- 공공데이터포털 동물병원 데이터
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+공모전 출품작 · 자세한 기획/진행 상황은 [PROJECT.md](./PROJECT.md) 참고

@@ -1,0 +1,158 @@
+// 멍경로 데이터 모델
+// Supabase(PostgreSQL + PostGIS) 대상. DATABASE_URL 없으면 앱은 데모 모드로 동작한다.
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+enum SizeClass {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum PlaceCategory {
+  NATURE // 자연 명소 (계곡, 공원, 습지)
+  TRAIL // 걷기길 (문경새재 옛길 등)
+  CAFE
+  RESTAURANT
+  STAY // 숙박
+  CULTURE // 역사/문화 (박물관, 사찰, 세트장)
+  ACTIVITY // 액티비티 (레일바이크, 모노레일)
+  VET // 동물병원
+  ETC
+}
+
+enum Theme {
+  NATURE_HEALING // 자연/힐링
+  CAFE_FOOD // 카페/미식
+  HISTORY_CULTURE // 역사/문화
+  ACTIVITY // 액티비티
+}
+
+enum DataSource {
+  TOURAPI
+  DEMO
+  MANUAL
+}
+
+model Pet {
+  id            String    @id @default(cuid())
+  userId        String
+  name          String
+  breed         String?
+  sizeClass     SizeClass
+  weightKg      Float?
+  ageYears      Int?
+  energyLevel   Int       @default(3) // 1(저활동) ~ 5(고활동)
+  sociability   Int       @default(3) // 1(낯가림) ~ 5(사교적)
+  prefersIndoor Boolean   @default(false)
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  routes        Route[]
+  visits        Visit[]
+
+  @@index([userId])
+}
+
+model Place {
+  id             String                                 @id @default(cuid())
+  contentId      String?                                @unique // TourAPI contentid
+  name           String
+  category       PlaceCategory
+  lat            Float
+  lng            Float
+  geom           Unsupported("geography(Point, 4326)")?
+  address        String?
+  phone          String?
+  imageUrl       String?
+  description    String?
+  petPolicy      String? // 동반 조건 원문 (목줄, 크기 제한 등)
+  tags           String[] // tag-extractor 산출물
+  indoor         Boolean                                @default(false)
+  allowLarge     Boolean                                @default(true)
+  avgStayMinutes Int                                    @default(60)
+  isEmergencyVet Boolean                                @default(false)
+  popularity     Float                                  @default(0.5) // 0~1
+  source         DataSource                             @default(DEMO)
+  createdAt      DateTime                               @default(now())
+  updatedAt      DateTime                               @updatedAt
+  stops          RouteStop[]
+  visits         Visit[]
+
+  @@index([category])
+}
+
+model Route {
+  id           String      @id @default(cuid())
+  userId       String
+  petId        String
+  pet          Pet         @relation(fields: [petId], references: [id], onDelete: Cascade)
+  title        String
+  theme        Theme
+  totalMinutes Int
+  startTime    String      @default("10:00") // HH:mm
+  createdAt    DateTime    @default(now())
+  stops        RouteStop[]
+  visits       Visit[]
+
+  @@index([userId])
+}
+
+model RouteStop {
+  id              String @id @default(cuid())
+  routeId         String
+  route           Route  @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  placeId         String
+  place           Place  @relation(fields: [placeId], references: [id])
+  order           Int
+  arriveOffsetMin Int // 코스 시작 기준 도착 시각(분)
+  stayMinutes     Int
+  travelMinutes   Int    @default(0) // 이전 스팟에서 이동시간
+
+  @@unique([routeId, order])
+}
+
+model Visit {
+  id        String    @id @default(cuid())
+  userId    String
+  petId     String
+  pet       Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  placeId   String
+  place     Place     @relation(fields: [placeId], references: [id])
+  routeId   String?
+  route     Route?    @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  visitedAt DateTime  @default(now())
+  feedback  Feedback?
+
+  @@index([userId, petId])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  visitId   String   @unique
+  visit     Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  rating    Int // 1~5
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+// 피드백 학습 루프: (사용자, 펫, 태그)별 선호 가중치
+model TagPreference {
+  id        String   @id @default(cuid())
+  userId    String
+  petId     String
+  tag       String
+  weight    Float    @default(0) // -1 ~ +1, 지수이동평균으로 갱신
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, petId, tag])
+}
