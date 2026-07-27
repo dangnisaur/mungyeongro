@@ -1,6 +1,6 @@
 // 데모 계정 초기 데이터 (펫 2 + 방문/피드백 10건).
 // 로컬 파일 저장소와 Firestore 시드 스크립트가 공용으로 사용한다.
-import type { Pet, TagWeights, Visit } from "@/types/domain";
+import type { Pet, Place, TagWeights, Visit } from "@/types/domain";
 import { updateTagWeights } from "@/lib/recommend/learning";
 import { DEMO_PLACES } from "./places";
 
@@ -11,7 +11,14 @@ export interface DemoData {
   tagPrefs: Record<string, TagWeights>;
 }
 
-export function buildDemoData(userId: string): DemoData {
+/**
+ * @param places 방문기록을 만들 시설 풀. 기본은 내장 데모 시드지만,
+ *   실데이터(TourAPI) 시드 후에는 Firestore의 실제 시설을 넘겨 이름 키워드로 매칭한다.
+ */
+export function buildDemoData(
+  userId: string,
+  places: readonly Place[] = DEMO_PLACES,
+): DemoData {
   const now = Date.now();
   const iso = (daysAgo: number) =>
     new Date(now - daysAgo * 24 * 60 * 60 * 1000).toISOString();
@@ -45,30 +52,35 @@ export function buildDemoData(userId: string): DemoData {
     createdAt: iso(55),
   };
 
-  // (petId, placeId, rating, daysAgo)
+  // (petId, 시설 이름 키워드, rating, daysAgo) — 데모/실데이터 어느 쪽에서도 매칭되게 키워드 사용
   const history: Array<[string, string, number, number]> = [
-    [bori.id, "demo-001", 5, 40],
-    [bori.id, "demo-006", 5, 40],
-    [bori.id, "demo-012", 4, 33],
-    [bori.id, "demo-018", 4, 26],
-    [bori.id, "demo-008", 2, 26],
-    [kong.id, "demo-008", 4, 21],
-    [kong.id, "demo-003", 3, 21],
-    [kong.id, "demo-013", 5, 14],
-    [kong.id, "demo-005", 4, 7],
-    [kong.id, "demo-002", 2, 7],
+    [bori.id, "새재", 5, 40],
+    [bori.id, "진남교반", 5, 40],
+    [bori.id, "계곡", 4, 33],
+    [bori.id, "공원", 4, 26],
+    [bori.id, "철로자전거", 2, 26], // 중소형견만 가능 → 대형견 보리는 불만족
+    [kong.id, "오미자", 4, 21],
+    [kong.id, "박물관", 3, 21],
+    [kong.id, "김룡사", 5, 14],
+    [kong.id, "고모산성", 4, 7],
+    [kong.id, "세트장", 2, 7],
   ];
 
   const visits: Visit[] = [];
   const tagPrefs: Record<string, TagWeights> = {};
-  history.forEach(([petId, placeId, rating, daysAgo], i) => {
-    const place = DEMO_PLACES.find((p) => p.id === placeId);
+  const used = new Set<string>();
+  history.forEach(([petId, keyword, rating, daysAgo], i) => {
+    const place = places.find(
+      (p) =>
+        p.category !== "VET" && p.name.includes(keyword) && !used.has(p.id),
+    );
     if (!place) return;
+    used.add(place.id);
     visits.push({
       id: `demo-visit-${i + 1}`,
       userId,
       petId,
-      placeId,
+      placeId: place.id,
       routeId: null,
       visitedAt: iso(daysAgo),
       feedback: { rating, comment: null, createdAt: iso(daysAgo) },

@@ -80,9 +80,11 @@ export function inferPetConstraints(petPolicy: string): PetConstraints {
   const smallOnly =
     p.includes("소형견만") ||
     p.includes("소형견 전용") ||
-    p.includes("소형") === true &&
+    // TourAPI 실데이터 문구: "중소형견 동반 가능" 등 → 대형견 불가로 해석
+    (p.includes("중소형") && !p.includes("대형견 가능")) ||
+    (p.includes("소형") === true &&
       !p.includes("대형") &&
-      (p.includes("이하") || p.includes("만 가능"));
+      (p.includes("이하") || p.includes("만 가능")));
   const indoor =
     p.includes("실내") || p.includes("박물관") || p.includes("전시");
   return { allowLarge: !smallOnly, indoor };

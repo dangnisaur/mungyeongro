@@ -20,11 +20,11 @@ interface AreaBasedItem {
   tel?: string;
 }
 
-/** KorPetTourService detailPetTour 응답 항목 (필요 필드만) */
+/** KorPetTourService2 detailPetTour2 응답 항목 (필요 필드만) */
 interface PetTourItem {
   contentid: string;
-  acmpyTypeCd?: string; // 동반구분 (동반가능 등)
-  acmpyPsblCpam?: string; // 동반 가능 동물 (예: "개(소형,중형)")
+  acmpyTypeCd?: string; // 동반구분 (예: "전구역 동반가능")
+  acmpyPsblCpam?: string; // 동반 가능 동물 (예: "중소형견 동반 가능")
   acmpyNeedMtr?: string; // 필요사항 (목줄, 입마개 등)
   etcAcmpyInfo?: string;
   relaPosesFclty?: string; // 관련 구비 시설
@@ -34,10 +34,23 @@ interface PetTourItem {
 const CONTENT_TYPE_TO_CATEGORY: Record<string, PlaceCategory> = {
   "12": "NATURE", // 관광지
   "14": "CULTURE", // 문화시설
+  "15": "ETC", // 축제/공연/행사
   "28": "ACTIVITY", // 레포츠
   "32": "STAY", // 숙박
   "38": "ETC", // 쇼핑
   "39": "RESTAURANT", // 음식점
+};
+
+/** 카테고리별 기본 체류시간(분) */
+const STAY_BY_CATEGORY: Partial<Record<PlaceCategory, number>> = {
+  NATURE: 80,
+  TRAIL: 100,
+  CULTURE: 60,
+  ACTIVITY: 80,
+  CAFE: 50,
+  RESTAURANT: 60,
+  STAY: 60,
+  ETC: 40,
 };
 
 function toNumber(v: string | undefined): number | null {
@@ -52,8 +65,8 @@ export async function fetchMungyeongPlaces(): Promise<AreaBasedItem[]> {
   let page = 1;
   for (;;) {
     const { items, totalCount } = await tourApiFetch<AreaBasedItem>(
-      "KorService1",
-      "areaBasedList1",
+      "KorService2",
+      "areaBasedList2",
       {
         areaCode: AREA_CODE_GYEONGBUK,
         sigunguCode: SIGUNGU_CODE_MUNGYEONG,
@@ -74,8 +87,8 @@ export async function fetchPetTourInfo(
   contentId: string,
 ): Promise<PetTourItem | null> {
   const { items } = await tourApiFetch<PetTourItem>(
-    "KorPetTourService",
-    "detailPetTour",
+    "KorPetTourService2",
+    "detailPetTour2",
     { contentId },
   );
   return items[0] ?? null;
@@ -89,8 +102,10 @@ export function mergeToPlace(
   const lat = toNumber(base.mapy);
   const lng = toNumber(base.mapx);
   if (lat === null || lng === null) return null;
+  if (base.contenttypeid === "25") return null; // 여행코스는 단일 장소가 아니므로 제외
 
   const petPolicyParts = [
+    pet?.acmpyTypeCd,
     pet?.acmpyPsblCpam,
     pet?.acmpyNeedMtr,
     pet?.etcAcmpyInfo,
@@ -100,12 +115,13 @@ export function mergeToPlace(
     " ",
   );
   const constraints = inferPetConstraints(petPolicy ?? "");
+  const category = CONTENT_TYPE_TO_CATEGORY[base.contenttypeid] ?? "ETC";
 
   return {
     id: `tour-${base.contentid}`,
     contentId: base.contentid,
     name: base.title,
-    category: CONTENT_TYPE_TO_CATEGORY[base.contenttypeid] ?? "ETC",
+    category,
     lat,
     lng,
     address: [base.addr1, base.addr2].filter(Boolean).join(" ") || null,
@@ -116,9 +132,10 @@ export function mergeToPlace(
     tags: extractTags(text),
     indoor: constraints.indoor,
     allowLarge: constraints.allowLarge,
-    avgStayMinutes: 60,
+    avgStayMinutes: STAY_BY_CATEGORY[category] ?? 60,
     isEmergencyVet: false,
-    popularity: base.firstimage ? 0.7 : 0.4, // 데이터 완성도 기반 기본값
+    // 데이터 완성도 기반 기본값 + 동반 정보 검증된 곳 가점
+    popularity: (base.firstimage ? 0.6 : 0.35) + (petPolicy ? 0.3 : 0),
     source: "TOURAPI",
   };
 }

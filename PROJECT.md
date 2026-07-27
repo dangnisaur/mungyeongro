@@ -212,11 +212,18 @@ score(place, pet, ctx) =
    셀프호스팅, 시그니처는 섹션을 잇는 발자국 트레일 라인. 스크롤 리빌은
    prefers-reduced-motion 존중, 포커스 링 명시.
 
+8. **(2026-07-27) TourAPI v2 실데이터 연결 완료** — 발급 키가 신버전(KorService2 /
+   KorPetTourService2)이라 호출부를 v2 오퍼레이션(areaBasedList2, detailPetTour2)으로 전환.
+   문경시(areaCode 35, sigunguCode 7 — areaCode2로 실검증) 실데이터 77곳 적재, 동반 정보
+   보유 2곳(철로자전거 "중소형견", 진남교반 "전 견종") 병합. "중소형견" 문구를 대형견 불가
+   하드 제약으로 해석하는 규칙 추가. 여행코스 타입(25)은 단일 장소가 아니라 제외.
+   실데이터 적재 시 데모 가상 상호는 삭제하되, 실데이터에 없는 동물병원은 데모로 유지.
+   데모 방문기록은 시설 ID 대신 이름 키워드 매칭으로 변경해 실데이터에서도 유효.
+
 ## 블로커
 
-1. **TourAPI 인증키 미발급** — 공공데이터포털에서 KorPetTourService 활용신청 필요.
-   발급 후 `npm run seed:tourapi`로 실데이터 교체. 그때까지 데모 시드로 동작.
+1. **카카오맵 도메인 미등록** — JS 키는 유효하나 401 `domain mismatched`.
+   developers.kakao.com > 내 애플리케이션 > 앱 설정 > 플랫폼 > Web에
+   `http://localhost:3000` (배포 후엔 배포 도메인도) 등록 필요. 등록 전까지 Leaflet 폴백으로 동작.
 2. **실제 Firebase 프로젝트 미생성 (배포용)** — 콘솔에서 생성 후 env 설정 필요.
    로컬은 에뮬레이터로 완전 동작하므로 개발에는 지장 없음.
-3. **카카오맵 JS 키 미발급 (선택)** — 없어도 Leaflet 실지도로 동작. 심사 어필용으로
-   국내 지도가 필요하면 developers.kakao.com에서 발급.
