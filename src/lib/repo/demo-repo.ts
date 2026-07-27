@@ -12,9 +12,16 @@ import type {
   Visit,
 } from "@/types/domain";
 import { DEMO_PLACES } from "@/data/demo/places";
+import REAL_PLACES_JSON from "@/data/real/places.json";
 import { buildDemoData } from "@/data/demo/fixtures";
 import { updateTagWeights } from "@/lib/recommend/learning";
 import type { Repo, VisitInput } from "./types";
+
+// TourAPI 스냅샷(scripts/export-places.ts 산출물)이 있으면 실데이터를,
+// 없으면 내장 데모 시드를 사용한다. Firebase 없는 배포(Vercel 데모 모드)에서도
+// 실데이터로 동작하게 하기 위함.
+const REAL_PLACES = REAL_PLACES_JSON as unknown as Place[];
+const PLACES: Place[] = REAL_PLACES.length > 0 ? REAL_PLACES : DEMO_PLACES;
 
 interface StoreShape {
   pets: Pet[];
@@ -27,12 +34,12 @@ interface StoreShape {
 const STORE_PATH = path.join(process.cwd(), ".demo-store.json");
 
 function findPlace(id: string): Place | undefined {
-  return DEMO_PLACES.find((p) => p.id === id);
+  return PLACES.find((p) => p.id === id);
 }
 
 /** 데모 계정의 초기 데이터 (src/data/demo/fixtures.ts 공용 픽스처) */
 function initialStore(demoUserId: string): StoreShape {
-  const demo = buildDemoData(demoUserId);
+  const demo = buildDemoData(demoUserId, PLACES);
   const tagPrefs: Record<string, TagWeights> = {};
   for (const [petId, weights] of Object.entries(demo.tagPrefs)) {
     tagPrefs[`${demoUserId}:${petId}`] = weights;
@@ -81,13 +88,13 @@ export function createDemoRepo(demoUserId: string): Repo {
 
   return {
     async listPlaces() {
-      return DEMO_PLACES;
+      return PLACES;
     },
     async getPlace(id) {
       return findPlace(id) ?? null;
     },
     async listVets() {
-      return DEMO_PLACES.filter((p) => p.category === "VET");
+      return PLACES.filter((p) => p.category === "VET");
     },
 
     async listPets(userId) {
