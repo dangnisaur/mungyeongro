@@ -50,3 +50,6 @@ next-env.d.ts
 .firebase/
 .vercel
 .env*
+
+# 발표용 비공개 문서
+docs/DEMO.md
