@@ -172,7 +172,9 @@ score(place, pet, ctx) =
 - [x] 방문 이력 UI (`/history`)
 - [x] 만족도 피드백 → 태그 가중치 즉시 재계산 (EMA 학습 루프)
 - [x] 데모용 시드 데이터 (펫 2, 방문이력 10건 자동 생성)
-- [ ] Vercel 배포 → 사용자가 git push 후 진행 예정 (로컬 완성 우선 지시)
+- [x] Vercel 배포 — https://mungyeongro.vercel.app (2026-07-27, mg225090612-lab 계정)
+  - 배포본은 Firebase 미설정 → 스냅샷 실데이터 + 데모 사용자 모드로 동작
+  - 실제 Firebase 프로젝트 연결 시 로그인/개인화가 프로덕션에서도 활성화됨 (블로커 #2)
 - [x] README 정리
 - [x] 데모 시나리오 문서 (`docs/DEMO.md`)
 
