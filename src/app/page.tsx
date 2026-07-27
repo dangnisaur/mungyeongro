@@ -93,7 +93,7 @@ function TrailPath() {
 }
 
 export default async function LandingPage() {
-  const repo = getRepo();
+  const repo = await getRepo();
   const places = await repo.listPlaces();
   const markers = places.map((p) => ({
     id: p.id,

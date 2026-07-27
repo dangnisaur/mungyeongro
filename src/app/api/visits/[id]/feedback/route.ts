@@ -19,7 +19,7 @@ export async function POST(req: Request, { params }: Params) {
       { status: 400 },
     );
   }
-  const visit = await getRepo().setFeedback(user.id, id, parsed.data);
+  const visit = await (await getRepo()).setFeedback(user.id, id, parsed.data);
   if (!visit) {
     return NextResponse.json({ error: "찾을 수 없어요" }, { status: 404 });
   }

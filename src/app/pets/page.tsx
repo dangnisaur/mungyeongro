@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function PetsPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
-  const pets = await getRepo().listPets(user.id);
+  const pets = await (await getRepo()).listPets(user.id);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">

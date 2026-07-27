@@ -12,7 +12,7 @@ export default async function RoutePage({
 }) {
   const { id } = await params;
   const user = await getSessionUser();
-  const repo = getRepo();
+  const repo = await getRepo();
 
   const route = await repo.getRoute(id);
   if (!route) notFound();

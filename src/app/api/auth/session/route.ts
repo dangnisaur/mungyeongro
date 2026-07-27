@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { adminAuth, isFirebaseConfigured } from "@/lib/firebase/admin";
+import { isFirebaseConfigured } from "@/lib/firebase/config";
 import { SESSION_COOKIE } from "@/lib/auth-shared";
 
 const bodySchema = z.object({ idToken: z.string().min(10) });
@@ -15,6 +15,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
   }
   try {
+    const { adminAuth } = await import("@/lib/firebase/admin");
     await adminAuth().verifyIdToken(parsed.data.idToken);
   } catch {
     return NextResponse.json({ error: "유효하지 않은 토큰" }, { status: 401 });

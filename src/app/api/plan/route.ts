@@ -18,7 +18,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     );
   }
   const { petId, theme, totalMinutes, startTime } = parsed.data;
-  const repo = getRepo();
+  const repo = await getRepo();
 
   const pet = await repo.getPet(user.id, petId);
   if (!pet) {

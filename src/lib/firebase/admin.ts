@@ -1,5 +1,7 @@
 // firebase-admin 초기화 (서버 전용).
-// - 에뮬레이터 모드: NEXT_PUBLIC_FIREBASE_EMULATOR=1 → 로컬 에뮬레이터에 연결 (자격증명 불필요)
+// ⚠️ 이 모듈은 반드시 isFirebaseConfigured()가 true일 때만 (동적 import로) 로드할 것.
+//    firebase-admin의 하위 의존성(jose)이 일부 서버리스 런타임에서 require 실패한다.
+// - 에뮬레이터 모드: NEXT_PUBLIC_FIREBASE_EMULATOR=1 → 로컬 에뮬레이터 (자격증명 불필요)
 // - 프로덕션 모드: FIREBASE_SERVICE_ACCOUNT(JSON) 또는 ADC 자격증명 사용
 import {
   cert,
@@ -10,24 +12,9 @@ import {
 } from "firebase-admin/app";
 import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { EMULATOR_PROJECT_ID, isEmulatorMode } from "./config";
 
-export const EMULATOR_PROJECT_ID = "demo-munggyeongro";
-
-export function isEmulatorMode(): boolean {
-  return process.env.NEXT_PUBLIC_FIREBASE_EMULATOR === "1";
-}
-
-/** Firebase 백엔드를 쓸 수 있는 상태인가 (에뮬레이터 또는 실제 프로젝트 설정) */
-export function isFirebaseConfigured(): boolean {
-  return (
-    isEmulatorMode() ||
-    Boolean(
-      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
-        (process.env.FIREBASE_SERVICE_ACCOUNT ||
-          process.env.GOOGLE_APPLICATION_CREDENTIALS),
-    )
-  );
-}
+export { EMULATOR_PROJECT_ID, isEmulatorMode, isFirebaseConfigured } from "./config";
 
 let app: App | null = null;
 

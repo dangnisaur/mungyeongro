@@ -23,7 +23,7 @@ export default async function PlacesPage({
   searchParams: Promise<{ category?: string }>;
 }) {
   const { category } = await searchParams;
-  const places = await getRepo().listPlaces();
+  const places = await (await getRepo()).listPlaces();
   const filtered =
     category && category !== "ALL"
       ? places.filter((p) => p.category === category)

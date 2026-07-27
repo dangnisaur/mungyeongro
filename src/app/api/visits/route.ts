@@ -16,6 +16,6 @@ export async function POST(req: Request): Promise<NextResponse> {
       { status: 400 },
     );
   }
-  const visit = await getRepo().createVisit(user.id, parsed.data);
+  const visit = await (await getRepo()).createVisit(user.id, parsed.data);
   return NextResponse.json({ visit }, { status: 201 });
 }

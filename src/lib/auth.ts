@@ -1,7 +1,8 @@
 // 서버 인증: Firebase Auth ID 토큰(쿠키) 검증.
 // Firebase 미설정 시에는 로컬 데모 사용자로 동작한다.
+// firebase-admin은 설정된 경우에만 동적 로드한다 (Vercel 데모 모드 호환).
 import { cookies } from "next/headers";
-import { adminAuth, isFirebaseConfigured } from "@/lib/firebase/admin";
+import { isFirebaseConfigured } from "@/lib/firebase/config";
 import {
   DEMO_USER_ID,
   SESSION_COOKIE,
@@ -22,6 +23,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
   try {
+    const { adminAuth } = await import("@/lib/firebase/admin");
     const decoded = await adminAuth().verifyIdToken(token);
     return {
       id: decoded.uid,

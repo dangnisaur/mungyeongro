@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function HistoryPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
-  const repo = getRepo();
+  const repo = await getRepo();
   const [visits, pets, places] = await Promise.all([
     repo.listVisits(user.id),
     repo.listPets(user.id),

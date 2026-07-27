@@ -18,7 +18,7 @@ export async function PATCH(req: Request, { params }: Params) {
       { status: 400 },
     );
   }
-  const pet = await getRepo().updatePet(user.id, id, parsed.data);
+  const pet = await (await getRepo()).updatePet(user.id, id, parsed.data);
   if (!pet) {
     return NextResponse.json({ error: "찾을 수 없어요" }, { status: 404 });
   }
@@ -29,7 +29,7 @@ export async function DELETE(_req: Request, { params }: Params) {
   const { id } = await params;
   const user = await getSessionUser();
   if (!user) return NextResponse.json(UNAUTHORIZED, { status: 401 });
-  const ok = await getRepo().deletePet(user.id, id);
+  const ok = await (await getRepo()).deletePet(user.id, id);
   if (!ok) {
     return NextResponse.json({ error: "찾을 수 없어요" }, { status: 404 });
   }

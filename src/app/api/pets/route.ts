@@ -8,7 +8,7 @@ const UNAUTHORIZED = { error: "로그인이 필요해요" };
 export async function GET(): Promise<NextResponse> {
   const user = await getSessionUser();
   if (!user) return NextResponse.json(UNAUTHORIZED, { status: 401 });
-  const pets = await getRepo().listPets(user.id);
+  const pets = await (await getRepo()).listPets(user.id);
   return NextResponse.json({ pets });
 }
 
@@ -22,6 +22,6 @@ export async function POST(req: Request): Promise<NextResponse> {
       { status: 400 },
     );
   }
-  const pet = await getRepo().createPet(user.id, parsed.data);
+  const pet = await (await getRepo()).createPet(user.id, parsed.data);
   return NextResponse.json({ pet }, { status: 201 });
 }
